@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Mood Diary</title>
+  </head>
+  <body>
+    <div class="title">Mood diary</div>
+
+    <div class="container">
+      <div>
+        <div>
+          <div class="currentMood">Current Mood is</div>
+          <button onclick="getMood()">Get mood</button>
+        </div>
+
+        <div class="setmoodContainer">
+          <label for="mood">Set Mood</label>
+          <input id="mood" type="text" />
+        </div>
+
+        <button onclick="setMood()">Set mood</button>
+      </div>
+    </div>
+  </body>
+
+  <script
+    src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+    type="application/javascript"
+  ></script>
+
+  <script>
+    var moodContact;
+    async function connectWallet() {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+
+      let signer = provider.getSigner();
+
+      var moodContractAddress = "0x20361F6CefF533e72967A7391E713b2d175f3748";
+      var moodContractABI = [
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "_mood",
+              type: "string",
+            },
+          ],
+          name: "setMood",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getMood",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ];
+      moodContact = new ethers.Contract(
+        moodContractAddress,
+        moodContractABI,
+        signer
+      );
+    }
+
+    async function getMood() {
+      let setmood = document.querySelector(".currentMood");
+      getMoodPromise = moodContact.getMood();
+      var Mood = await getMoodPromise;
+      setmood.innerText = "Current Mood is " + Mood;
+    }
+
+    async function setMood() {
+      let mood = document.getElementById("mood").value;
+      setMoodPromise = moodContact.setMood(mood);
+      await setMoodPromise;
+      console.log("setmood successful");
+    }
+
+    connectWallet();
+  </script>
+</html>
